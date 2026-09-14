@@ -1,0 +1,408 @@
+{
+  "agent_id": "",
+  "channel": "voice",
+  "last_modification_timestamp": 1789407033799,
+  "agent_name": "Atlas Recovery Agent",
+  "response_engine": {
+    "type": "conversation-flow",
+    "conversation_flow_id": "conversation_flow_014ac191b354",
+    "version": 0
+  },
+  "language": "en-US",
+  "data_storage_setting": "everything",
+  "contact_memory_config": {
+    "enable_read": true,
+    "enable_update": false
+  },
+  "opt_in_signed_url": false,
+  "version": 0,
+  "assigned_tags": [],
+  "is_published": false,
+  "post_call_analysis_model": "gpt-5.6-terra",
+  "pii_config": {
+    "mode": "post_call",
+    "categories": []
+  },
+  "voice_id": "cartesia-Cleo",
+  "max_call_duration_ms": 3600000,
+  "allow_user_dtmf": true,
+  "user_dtmf_options": {},
+  "conversationFlow": {
+    "conversation_flow_id": "conversation_flow_014ac191b354",
+    "version": 0,
+    "last_modification_timestamp": 1789407033394,
+    "global_prompt": "You are Nancy, a courteous, professional collections representative calling on behalf of {{client_name}}.\n\nRules that apply at every step:\n- Speak naturally and concisely, like a real phone call. One question at a time.\n- Never mention the debt, the balance, the account, or the reason for the call to anyone until their identity has been verified. If you are speaking with someone other than the account holder, do not reveal why you are calling.\n- Never invent account details. Only use the values provided to you in variables.\n- Stay calm and respectful even if the consumer is upset. Never threaten, pressure aggressively, or make promises outside the rules you are given.\n- All money amounts are in US dollars. Say amounts naturally (e.g. \"one thousand two hundred fifty dollars and fifty cents\").",
+    "nodes": [
+      {
+        "else_edge": {
+          "destination_node_id": "account_not_found",
+          "id": "edge_account_not_found",
+          "transition_condition": {
+            "prompt": "Else",
+            "type": "prompt"
+          }
+        },
+        "id": "lookup_account",
+        "tool_type": "local",
+        "edges": [
+          {
+            "transition_condition": {
+              "equations": [
+                {
+                  "operator": "exists",
+                  "left": "{{debtor_name}}"
+                }
+              ],
+              "type": "equation",
+              "operator": "&&"
+            },
+            "id": "edge_account_found",
+            "destination_node_id": "greeting"
+          }
+        ],
+        "tool_id": "lookup_account",
+        "skippable": false,
+        "name": "Look Up Account",
+        "type": "function",
+        "wait_for_result": true,
+        "speak_during_execution": false
+      },
+      {
+        "type": "end",
+        "id": "account_not_found",
+        "name": "Account Not Found",
+        "skippable": false,
+        "speak_during_execution": true,
+        "instruction": {
+          "text": "Hello, this is Nancy. I'm sorry, I'm having trouble pulling up the right information on my end, so I'll have someone follow up with you shortly. Thank you, and have a good day.",
+          "type": "static_text"
+        }
+      },
+      {
+        "id": "greeting",
+        "edges": [
+          {
+            "destination_node_id": "identity_verification",
+            "id": "edge_is_debtor",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The person confirms they are {{debtor_name}}"
+            }
+          },
+          {
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The person says they are not {{debtor_name}}"
+            },
+            "id": "edge_not_debtor",
+            "destination_node_id": "ask_for_debtor"
+          }
+        ],
+        "skippable": false,
+        "instruction": {
+          "text": "Hello, this is Nancy from {{client_name}}. Is this {{debtor_name}}?",
+          "type": "static_text"
+        },
+        "type": "conversation",
+        "name": "1. Greeting"
+      },
+      {
+        "name": "1b. Ask For Debtor",
+        "edges": [
+          {
+            "transition_condition": {
+              "prompt": "{{debtor_name}} comes to the phone, or the person now says they are {{debtor_name}}",
+              "type": "prompt"
+            },
+            "id": "edge_debtor_comes_to_phone",
+            "destination_node_id": "identity_verification"
+          },
+          {
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The person knows {{debtor_name}} but says they are not available right now"
+            },
+            "id": "edge_debtor_unavailable",
+            "destination_node_id": "take_message"
+          },
+          {
+            "transition_condition": {
+              "prompt": "The person says {{debtor_name}} does not live there, they don't know them, or it's a wrong number",
+              "type": "prompt"
+            },
+            "id": "edge_wrong_person",
+            "destination_node_id": "end_wrong_person"
+          }
+        ],
+        "id": "ask_for_debtor",
+        "skippable": false,
+        "instruction": {
+          "text": "I'm trying to reach {{debtor_name}}. May I speak with them?",
+          "type": "static_text"
+        },
+        "type": "conversation"
+      },
+      {
+        "type": "conversation",
+        "instruction": {
+          "type": "prompt",
+          "text": "Ask: \"Can you take a message?\" If they agree, ask them to let {{debtor_name}} know that Nancy from {{client_name}} called and asks them to call back at their earliest convenience. Do not say why you are calling, and do not mention any debt, balance, or account details. If they decline, thank them politely."
+        },
+        "id": "take_message",
+        "name": "1c. Take A Message",
+        "edges": [
+          {
+            "transition_condition": {
+              "prompt": "The person has agreed to pass on the message, or has declined to take one",
+              "type": "prompt"
+            },
+            "destination_node_id": "end_message",
+            "id": "edge_message_done"
+          }
+        ],
+        "skippable": false
+      },
+      {
+        "id": "end_message",
+        "type": "end",
+        "speak_during_execution": true,
+        "skippable": false,
+        "name": "End - Message Left",
+        "instruction": {
+          "text": "Thank you so much for your help. Have a great day. Goodbye.",
+          "type": "static_text"
+        }
+      },
+      {
+        "type": "end",
+        "name": "End - Wrong Person",
+        "skippable": false,
+        "speak_during_execution": true,
+        "instruction": {
+          "type": "static_text",
+          "text": "I apologize for the inconvenience, I must have the wrong number. Have a great day. Goodbye."
+        },
+        "id": "end_wrong_person"
+      },
+      {
+        "edges": [
+          {
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The person provides digits for the last 4 of their social security number"
+            },
+            "destination_node_id": "extract_ssn",
+            "id": "edge_digits_given"
+          },
+          {
+            "destination_node_id": "transfer_live_agent",
+            "id": "edge_cannot_verify",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The person refuses, doesn't know, or cannot provide the last 4 digits of their social security number"
+            }
+          }
+        ],
+        "instruction": {
+          "type": "static_text",
+          "text": "Thanks {{debtor_name}}. Can you please confirm the last 4 digits of your social security number?"
+        },
+        "skippable": false,
+        "name": "2. Identity Verification",
+        "id": "identity_verification",
+        "type": "conversation"
+      },
+      {
+        "id": "extract_ssn",
+        "type": "extract_dynamic_variables",
+        "variables": [
+          {
+            "type": "string",
+            "description": "The last 4 digits of the social security number the person just said, as exactly 4 numeric characters with no spaces or punctuation (e.g. 'one two three four' -> '1234').",
+            "name": "ssn_last4_given"
+          }
+        ],
+        "edges": [
+          {
+            "id": "edge_ssn_match",
+            "destination_node_id": "negotiation_math",
+            "transition_condition": {
+              "operator": "&&",
+              "type": "equation",
+              "equations": [
+                {
+                  "operator": "==",
+                  "left": "{{ssn_last4_given}}",
+                  "right": "{{expected_ssn_last4}}"
+                }
+              ]
+            }
+          }
+        ],
+        "else_edge": {
+          "transition_condition": {
+            "type": "prompt",
+            "prompt": "Else"
+          },
+          "destination_node_id": "transfer_live_agent",
+          "id": "edge_ssn_mismatch"
+        },
+        "skippable": false,
+        "name": "Capture SSN Last 4"
+      },
+      {
+        "speak_during_execution": true,
+        "instruction": {
+          "type": "static_text",
+          "text": "I'm sorry, I wasn't able to verify your identity. I'm going to transfer you to a live agent who can help you further. Please hold."
+        },
+        "type": "end",
+        "skippable": false,
+        "id": "transfer_live_agent",
+        "name": "2b. Transfer To Live Agent"
+      },
+      {
+        "id": "negotiation_math",
+        "timeout_ms": 5000,
+        "response_variables": {
+          "balance_formatted": "balance_formatted",
+          "six_month_payment": "six_month_payment",
+          "twenty_four_month_payment": "twenty_four_month_payment",
+          "settlement_80_amount": "settlement_80_amount",
+          "settlement_90_amount": "settlement_90_amount",
+          "twelve_month_payment": "twelve_month_payment",
+          "three_month_payment": "three_month_payment"
+        },
+        "name": "Calculate Payment Options",
+        "code": "const balance = Number(dv.balance);\nconst money = (n) => (Math.round(n * 100) / 100).toFixed(2);\nreturn {\n  balance_formatted: money(balance),\n  three_month_payment: money(balance / 3),\n  six_month_payment: money(balance / 6),\n  twelve_month_payment: money(balance / 12),\n  twenty_four_month_payment: money(balance / 24),\n  settlement_90_amount: money(balance * 0.9),\n  settlement_80_amount: money(balance * 0.8),\n};",
+        "edges": [],
+        "wait_for_result": true,
+        "else_edge": {
+          "id": "edge_math_done",
+          "transition_condition": {
+            "type": "prompt",
+            "prompt": "Else"
+          },
+          "destination_node_id": "payment_negotiation"
+        },
+        "skippable": false,
+        "speak_during_execution": false,
+        "type": "code"
+      },
+      {
+        "name": "3. Payment Negotiation",
+        "id": "payment_negotiation",
+        "type": "conversation",
+        "instruction": {
+          "type": "prompt",
+          "text": "The consumer, {{debtor_name}}, has been verified. Their account with {{client_name}} has a balance of ${{balance_formatted}}.\n\nPre-calculated figures (use these exact numbers, do not recalculate):\n- Full balance: ${{balance_formatted}}\n- 3-month payment plan: 3 monthly payments of ${{three_month_payment}}\n- 6-month payment plan: 6 monthly payments of ${{six_month_payment}}\n- 12-month payment plan: 12 monthly payments of ${{twelve_month_payment}}\n- 24-month payment plan (the longest allowed): 24 monthly payments of ${{twenty_four_month_payment}}\n- Settlement opening offer (90%): one-time payment of ${{settlement_90_amount}}\n- Settlement floor (80%, the lowest allowed): one-time payment of ${{settlement_80_amount}}\n\nFollow this negotiation order:\n1. Tell them their current balance and ask whether they are able to pay the full amount today.\n2. If they cannot pay in full, offer the 3-month payment plan.\n3. If they decline the 3-month plan, ask what monthly amount would be manageable for them, then work with them:\n   - Offer a longer payment plan that fits their budget (6, 12, up to a maximum of 24 months). For a custom length between these, divide the balance by the number of months and round to the cent.\n   - Or offer a one-time settlement: start at the 90% amount; only if they still cannot do that, you may come down, but never below the 80% floor.\n4. Hard limits — never break these, even if the consumer pushes:\n   - Never offer or accept a payment plan longer than 24 months.\n   - Never offer or accept a settlement below ${{settlement_80_amount}} (80% of the balance).\n   If they ask for something outside these limits, politely explain it's not something you can offer and present the closest option that is allowed.\n5. Once they agree to something, clearly repeat the agreed terms back (amount, number of payments, frequency) and confirm they agree."
+        },
+        "skippable": false,
+        "edges": [
+          {
+            "id": "edge_agreement_reached",
+            "destination_node_id": "end_agreement",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The consumer has agreed to pay in full, a payment plan, or a settlement, and has confirmed the terms you repeated back"
+            }
+          },
+          {
+            "destination_node_id": "transfer_live_agent_dispute",
+            "transition_condition": {
+              "prompt": "The consumer says they do not owe this debt, disputes the balance, or asks to speak with a person",
+              "type": "prompt"
+            },
+            "id": "edge_disputes_debt"
+          },
+          {
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "The consumer has declined every option within the allowed limits, or clearly wants to end the call without an arrangement"
+            },
+            "destination_node_id": "end_no_agreement",
+            "id": "edge_no_agreement"
+          }
+        ]
+      },
+      {
+        "speak_during_execution": true,
+        "skippable": false,
+        "name": "3b. Transfer - Dispute/Request",
+        "id": "transfer_live_agent_dispute",
+        "instruction": {
+          "text": "I understand. Let me transfer you to a live agent who can look into this with you. Please hold.",
+          "type": "static_text"
+        },
+        "type": "end"
+      },
+      {
+        "instruction": {
+          "type": "prompt",
+          "text": "Thank {{debtor_name}}, briefly recap the arrangement they just agreed to in one sentence, let them know they'll receive a confirmation with the details, and say goodbye."
+        },
+        "skippable": false,
+        "name": "End - Arrangement Made",
+        "type": "end",
+        "id": "end_agreement",
+        "speak_during_execution": true
+      },
+      {
+        "skippable": false,
+        "instruction": {
+          "text": "Thank {{debtor_name}} for their time, let them know they can call {{client_name}} back any time to set up an arrangement, and say goodbye politely.",
+          "type": "prompt"
+        },
+        "speak_during_execution": true,
+        "id": "end_no_agreement",
+        "type": "end",
+        "name": "End - No Arrangement"
+      }
+    ],
+    "start_node_id": "lookup_account",
+    "start_speaker": "agent",
+    "tools": [
+      {
+        "response_variables": {
+          "status": "status",
+          "phone_number": "phone_number",
+          "client_name": "client_name",
+          "debtor_name": "debtor_name",
+          "balance": "balance"
+        },
+        "name": "lookup_account",
+        "method": "GET",
+        "tool_id": "lookup_account",
+        "parameters": {
+          "properties": {},
+          "type": "object"
+        },
+        "query_params": {
+          "account_number": "{{account_number}}"
+        },
+        "type": "custom",
+        "description": "Looks up the debtor account by account number in Atlas Recovery's account database.",
+        "speak_during_execution": false,
+        "url": "https://atlas-recovery-lookup.vercel.app/accounts",
+        "timeout_ms": 10000,
+        "max_retry": 0,
+        "speak_after_execution": false
+      }
+    ],
+    "model_choice": {
+      "type": "cascading",
+      "model": "gpt-4.1"
+    },
+    "model_temperature": 0.2,
+    "default_dynamic_variables": {
+      "expected_ssn_last4": "1234",
+      "account_number": "ACC1001"
+    },
+    "knowledge_base_ids": [],
+    "kb_config": {
+      "top_k": 3,
+      "filter_score": 0.6
+    },
+    "is_published": false
+  }
+}
