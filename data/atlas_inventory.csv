@@ -1,0 +1,18 @@
+account_number,debtor_name,phone_number,balance,status,client_name
+ACC1001,John Doe,5551234567,1250.50,Active,Alpha Bank
+ACC1002,Jane Smith,555-234-5678,$980.00,Settlement Eligible,Beta Financial
+ACC1003,Robert Brown,(555) 345-6789,3200,Closed,Alpha Bank
+ACC1004,Emily Davis,5554567890,450.75,Active,Gamma Credit Union
+ACC1005,Michael Wilson,555-567-8901,2999.99,Bankruptcy,Beta Financial
+ACC1006,Sarah Johnson,5556789012,"1,200.00",Active,Alpha Bank
+ACC1007,David Lee,,875.00,Active,Gamma Credit Union
+,Missing Account Person,5558888888,500.00,Active,Alpha Bank
+ACC1009,Laura Martinez,5559999999,N/A,Active,Beta Financial
+ACC1010,Chris Taylor,5551112222,640.00,Disputed,Gamma Credit Union
+ACC1002,Jane Smith,555-234-5678,750.00,Closed,Beta Financial
+ACC1011,Karen Anderson,5553334444,15000.00,Active,Alpha Bank
+ACC1012,Steven Thomas,5555556666,300.00,UnknownStatusXYZ,Gamma Credit Union
+ACC1013,Nancy White,5557778888,0,Closed,Beta Financial
+ACC1014,Kevin Harris,5551239876,4500.25,Settlement Eligible,Alpha Bank
+ACC1015,Betty Clark,,,Active,Gamma Credit Union
+ACC1016,Paul Young,5552223333,-125.00,Active,Beta Financial

@@ -1,0 +1,7 @@
+node_modules/
+data/atlas.db
+data/atlas.db-*
+data/ingestion_errors.log
+.env
+retell/.retell-ids.json
+.tools/

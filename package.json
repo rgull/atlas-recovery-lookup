@@ -1,0 +1,22 @@
+{
+  "name": "atlas-recovery-lookup",
+  "version": "1.0.0",
+  "description": "CSV ingestion and account lookup API prototype for Atlas Recovery's AI calling agent.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "ingest": "node src/ingest.js",
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "tunnel": "cloudflared tunnel --url http://localhost:3000"
+  },
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.9.1",
+    "csv-parse": "^5.6.0",
+    "express": "^4.21.2"
+  }
+}
